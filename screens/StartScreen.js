@@ -7,15 +7,12 @@ import Button from "../components/Button";
 export default function StartScreen({ navigation }) {
   return (
     <Background>
-      <Header>Welcome to Tomato</Header>
+      <Header>Welcome to x</Header>
       <Paragraph>
-        The easiest way to start your online shopping experience
+        The easiest way to manage x services
       </Paragraph>
       <Button mode="contained" onPress={() => navigation.navigate("Login")}>
         Login
-      </Button>
-      <Button mode="outlined" color="tomato" onPress={() => navigation.navigate("SignUp")}>
-        Signup
       </Button>
     </Background>
   );
