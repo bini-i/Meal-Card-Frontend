@@ -50,11 +50,12 @@ export default function HomeScreen({navigation}) {
           })
           .then(({status, ok, json})=>{
             if(ok){
-              navigation.navigate("ServeScreen")
+              // navigation.navigate("ServeScreen")
+              alert(json.success)
             }else{
               switch(status){
                 case 401:
-                  alert(json.error)
+                  alert(json.error + "\n" + "ያለዎት " + json.remaining + " ብቻ ነው")
                   break;
                 case 404:
                   alert(json.error)
@@ -102,7 +103,6 @@ export default function HomeScreen({navigation}) {
     }
 
     const handleCounter = (number, type) =>{
-      console.log(number, type)
       setOrderAmount(number)
     }
 
@@ -110,6 +110,8 @@ export default function HomeScreen({navigation}) {
       <View style={styles.container}>
         <Counter 
           start={orderAmount} 
+          min={1}
+          max={10}
           onChange={handleCounter} 
           buttonTextStyle={{fontSize: 50, color: theme.colors.primary}} 
           buttonStyle={{paddingHorizontal: 25, paddingVertical:18, borderColor: theme.colors.primary}}
