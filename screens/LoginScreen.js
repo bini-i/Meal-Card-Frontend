@@ -51,14 +51,11 @@ export default function LoginScreen({ navigation }) {
         return response.json()
       })
       .then(data => {
-        console.log("success")
-        console.log(data)
         setIsLoading(false)
         login(data)
       }) 
       .catch((error) => {
         setIsLoading(false)
-        console.log(error.message)
         setErrorText(error.message)
       })
     } catch (error) {
