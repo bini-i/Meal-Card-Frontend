@@ -1,5 +1,10 @@
 import RootNavigation from "./navigation"
+import { AuthProvider } from "./context/AuthContext"
 
 export default function App(){
-  return (<RootNavigation/>)
+  return (
+    <AuthProvider>
+      <RootNavigation/>
+    </AuthProvider>
+  )
 }

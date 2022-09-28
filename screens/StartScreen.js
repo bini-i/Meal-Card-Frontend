@@ -1,4 +1,4 @@
-import React from "react"; 
+import React, {useContext} from "react"; 
 import Header from "../components/Header";
 import Paragraph from "../components/Paragraph";
 import Background from "../components/Background";
@@ -7,12 +7,16 @@ import Button from "../components/Button";
 export default function StartScreen({ navigation }) {
   return (
     <Background>
-      <Header>Welcome to x</Header>
+
+      <Header>Welcome!</Header>
+      <Paragraph style={{fontSize: 16, fontWeight: "bold", marginBottom: 5}}>
+        በአዲስ አበባ ከተማ አስተዳደር 
+      </Paragraph> 
       <Paragraph>
-        The easiest way to manage x services
+        የምርታማነት ማሻሻያና ልህቀት ማዕከል 
       </Paragraph>
       <Button mode="contained" onPress={() => navigation.navigate("Login")}>
-        Login
+        ይግቡ
       </Button>
     </Background>
   );

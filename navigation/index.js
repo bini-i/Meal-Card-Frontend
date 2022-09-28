@@ -1,10 +1,13 @@
-import React from 'react'
-import {useAuthentication} from '../utils/useAuthentication'
+import React, { useContext } from 'react'
+import { View } from "react-native";
 import UserStack from './userStack'
 import AuthStack from './authStack'
+import { AuthContext } from '../context/AuthContext'
+// import {useAuthentication} from '../utils/useAuthentication'
 
 export default function RootNavigation() {
-    const {user} = useAuthentication();
+    const {accessToken} = useContext(AuthContext)
+    // const {user} = useAuthentication();
 
-    return user ? <UserStack/> : <AuthStack />
+    return accessToken ? <UserStack/> : <AuthStack />
 }
