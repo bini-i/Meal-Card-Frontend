@@ -11,7 +11,7 @@ export const AuthProvider = ({children}) => {
     const login = (data) => {
         setAccessToken(data.access_token)
         if(accessToken){
-            AsyncStorage.setItem('accessToken', accessToken)
+           AsyncStorage.setItem('accessToken', accessToken)
         }
         setUser(data)
         setIsLoading(false)
@@ -26,10 +26,8 @@ export const AuthProvider = ({children}) => {
 
     const isLoggedIn = async() => {
         try {
-            setIsLoading(true)
-            let access_token = AsyncStorage.getItem('accessToken') 
-
-            setAccessToken(access_token)
+            const value = await AsyncStorage.getItem('accessToken')
+            setAccessToken(value)
         }catch(e){
             console.log(e)
         }
