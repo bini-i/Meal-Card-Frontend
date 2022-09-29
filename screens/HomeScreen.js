@@ -26,7 +26,7 @@ export default function HomeScreen({navigation}) {
         console.log(`Bar code with type ${type} and data ${data} has been scanned`)
         console.log("accessToken = " + accessToken)
         try{
-          fetch(`http://localhost:3000/employees/${data}`,{
+          fetch(`http://localhost:3000/v1/employees/${data}`,{
             method: "POST",
             headers: {
               Accept: "application/json",
@@ -50,8 +50,13 @@ export default function HomeScreen({navigation}) {
           })
           .then(({status, ok, json})=>{
             if(ok){
-              // navigation.navigate("ServeScreen")
-              alert(json.success)
+              navigation.navigate("ServeScreen", {
+                firstName: json.first_name,
+                fatherName: json.father_name,
+                remaining: json.remaining,
+                message: json.success
+              })
+              // alert(json.success)
             }else{
               switch(status){
                 case 401:
