@@ -18,11 +18,6 @@ export default function HomeScreen({navigation}) {
     const {accessToken} = useContext(AuthContext)
 
     useEffect(() => {
-      console.log("Mounting screen")
-      console.log(hasPermission)
-      console.log(empId)
-
-
         const getBarCodeScannerPermissions = async() => {
             const {status} = await BarCodeScanner.requestPermissionsAsync()
             setHasPermission(status === 'granted')
