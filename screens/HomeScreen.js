@@ -1,18 +1,28 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Button, View, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { Button, View, StyleSheet, Text, TouchableOpacity, Alert } from "react-native";
 import {BarCodeScanner} from 'expo-barcode-scanner'
 import { theme } from "../core/theme";
 import Counter from "react-native-counters";
 import { AuthContext } from "../context/AuthContext";
+import AwesomeAlert from 'react-native-awesome-alerts';
 
 export default function HomeScreen({navigation}) {
     const [hasPermission, setHasPermission] = useState(null)
     const [scanned, setScanned] = useState(false)
     const [orderAmount, setOrderAmount] = useState(1)
+    const [showAlert, setShowAlert] = useState(false)
+    const [firstName, setFirstName] = useState("")
+    const [fatherName, setFatherName] = useState("")
+    const [empId, setEmpId] = useState(null)
 
     const {accessToken} = useContext(AuthContext)
 
     useEffect(() => {
+      console.log("Mounting screen")
+      console.log(hasPermission)
+      console.log(empId)
+
+
         const getBarCodeScannerPermissions = async() => {
             const {status} = await BarCodeScanner.requestPermissionsAsync()
             setHasPermission(status === 'granted')
@@ -23,10 +33,65 @@ export default function HomeScreen({navigation}) {
 
     const handleBarCodeScanned = ({type, data}) => {
         setScanned(false)
-        console.log(`Bar code with type ${type} and data ${data} has been scanned`)
-        console.log("accessToken = " + accessToken)
+        // console.log(`Bar code with type ${type} and data ${data} has been scanned`)
+        // console.log("accessToken = " + accessToken)
+
         try{
-          fetch(`http://localhost:3000/v1/employees/${data}`,{
+            fetch(`http://localhost:3000/v1/employees/check/${data}`,{
+              method: "POST",
+              headers: {
+                Accept: "application/json",
+                "content-type": "application/json",
+                Authorization: accessToken
+              },
+              body: JSON.stringify({
+                employee: {
+                  order_amount: orderAmount
+                }
+              })
+            })
+            .then((response)=>{
+              return new Promise((resolve) => response.json().then(
+                (json) => resolve({
+                  status: response.status,
+                  ok: response.ok,
+                  json
+                }))
+              )
+            })
+            .then(({status, ok, json})=>{
+              if(ok){
+                setEmpId(json.emp_id)
+                setFirstName(json.first_name)
+                setFatherName(json.father_name)
+                setShowAlert(true)
+              }else{
+                switch(status){
+                  case 401:
+                    alert(json.error + "\n" + "ያለዎት " + json.remaining + " ብቻ ነው")
+                    break;
+                  case 404:
+                    alert(json.error)
+                    break;
+                  case 500:
+                    alert(json.error)
+                    break;
+                  default:
+                    alert("Please try again")
+                }
+              }
+            })
+            .catch((error)=>{
+              alert("please try again")
+            })
+        }catch(error){
+          alert("Please try again!")
+        }
+      }
+      
+      const serve = () => {
+        try{
+          fetch(`http://localhost:3000/v1/employees/${empId}`,{
             method: "POST",
             headers: {
               Accept: "application/json",
@@ -50,6 +115,7 @@ export default function HomeScreen({navigation}) {
           })
           .then(({status, ok, json})=>{
             if(ok){
+              hideAlert() //critical if not set "AwesomeAlert" can keep on calling serve method
               navigation.navigate("ServeScreen", {
                 firstName: json.first_name,
                 fatherName: json.father_name,
@@ -111,6 +177,14 @@ export default function HomeScreen({navigation}) {
       setOrderAmount(number)
     }
 
+    const displayAlert = () => {
+      setShowAlert(true)
+    };
+  
+    const hideAlert = () => {
+      setShowAlert(false)
+    };
+
     return (
       <View style={styles.container}>
         <Counter 
@@ -141,6 +215,25 @@ export default function HomeScreen({navigation}) {
         >
             <Text>ያቋርጡ</Text>
         </TouchableOpacity>}
+
+        <AwesomeAlert
+          show={showAlert}
+          showProgress={false}
+          title={"ከ " + firstName + " " + fatherName + " " + orderAmount + " ኩፖን ለመቁረጥ አዘዋል \n\n እርግጠኛ ነዎት?"}
+          closeOnTouchOutside={true}
+          closeOnHardwareBackPress={false}
+          showCancelButton={true}
+          showConfirmButton={true}
+          cancelText="አይ, አቋርጥ"
+          confirmText="አዎ, አስተናግድ"
+          confirmButtonColor="#DD6B55"
+          onCancelPressed={() => {
+            hideAlert();
+          }}
+          onConfirmPressed={() => {
+            serve();
+          }}
+        />
       </View>
     );
 }

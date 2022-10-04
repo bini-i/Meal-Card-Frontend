@@ -31,8 +31,7 @@ export default function LoginScreen({ navigation }) {
     setIsLoading(true)
     
     try {
-      console.log("fetching")
-      fetch("http://127.0.0.1:3000/login", {
+      fetch("http://localhost:3000/login", {
           method: "POST",
           headers: {
               Accept: 'application/json',
@@ -44,7 +43,6 @@ export default function LoginScreen({ navigation }) {
           })
       })
       .then((response) => {
-        console.log(response)
         if(!response.ok){
           throw new Error("Please try again")
         }
