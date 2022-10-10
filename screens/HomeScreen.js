@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Button, View, StyleSheet, Text, TouchableOpacity, Alert } from "react-native";
+import { Button, View, StyleSheet, Text, TouchableOpacity, Modal, ActivityIndicator } from "react-native";
 import {BarCodeScanner} from 'expo-barcode-scanner'
 import { theme } from "../core/theme";
 import Counter from "react-native-counters";
@@ -16,6 +16,8 @@ export default function HomeScreen({navigation}) {
     const [empId, setEmpId] = useState(null)
 
     const {accessToken} = useContext(AuthContext)
+    const {isLoading, setIsLoading} = useContext(AuthContext)
+
 
     useEffect(() => {
         const getBarCodeScannerPermissions = async() => {
@@ -30,7 +32,7 @@ export default function HomeScreen({navigation}) {
         setScanned(false)
         // console.log(`Bar code with type ${type} and data ${data} has been scanned`)
         // console.log("accessToken = " + accessToken)
-
+        setIsLoading(true)
         try{
             fetch(`http://localhost:3000/v1/employees/check/${data}`,{
               method: "POST",
@@ -59,8 +61,10 @@ export default function HomeScreen({navigation}) {
                 setEmpId(json.emp_id)
                 setFirstName(json.first_name)
                 setFatherName(json.father_name)
+                setIsLoading(false)
                 setShowAlert(true)
               }else{
+                setIsLoading(false)
                 switch(status){
                   case 401:
                     alert(json.error + "\n" + "ያለዎት " + json.remaining + " ብቻ ነው")
@@ -77,14 +81,17 @@ export default function HomeScreen({navigation}) {
               }
             })
             .catch((error)=>{
+              setIsLoading(false)
               alert("please try again")
             })
         }catch(error){
+          setIsLoading(false)
           alert("Please try again!")
         }
       }
       
       const serve = () => {
+        setIsLoading(true)
         try{
           fetch(`http://localhost:3000/v1/employees/${empId}`,{
             method: "POST",
@@ -110,6 +117,7 @@ export default function HomeScreen({navigation}) {
           })
           .then(({status, ok, json})=>{
             if(ok){
+              setIsLoading(false)
               hideAlert() //critical if not set "AwesomeAlert" can keep on calling serve method
               navigation.navigate("ServeScreen", {
                 firstName: json.first_name,
@@ -119,6 +127,8 @@ export default function HomeScreen({navigation}) {
               })
               // alert(json.success)
             }else{
+              setIsLoading(false)
+              hideAlert()
               switch(status){
                 case 401:
                   alert(json.error + "\n" + "ያለዎት " + json.remaining + " ብቻ ነው")
@@ -147,9 +157,13 @@ export default function HomeScreen({navigation}) {
           //   navigation.navigate("ServeScreen")
           // })
           .catch((error)=>{
+            setIsLoading(false)
+            hideAlert()
             alert("please try again inside")
           })
         }catch(error){
+          setIsLoading(false)
+          hideAlert()
           console.log(error)
           // please try again
           alert("Please try again")
@@ -182,6 +196,21 @@ export default function HomeScreen({navigation}) {
 
     return (
       <View style={styles.container}>
+        {
+          isLoading && (
+            <Modal transparent>
+              <View style={{
+                  flex: 1,
+                  opacity: 0.6,
+                  backgroundColor: '#000',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <ActivityIndicator size={'large'} />
+              </View>
+            </Modal>
+          ) 
+        }
         <Counter 
           start={orderAmount} 
           min={1}
