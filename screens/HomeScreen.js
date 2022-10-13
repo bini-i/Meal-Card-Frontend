@@ -1,10 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Button, View, StyleSheet, Text, TouchableOpacity, Modal, ActivityIndicator } from "react-native";
+import { Button, View, StyleSheet, Text, TouchableOpacity, Modal, ActivityIndicator, FlatList } from "react-native";
 import {BarCodeScanner} from 'expo-barcode-scanner'
 import { theme } from "../core/theme";
 import Counter from "react-native-counters";
 import { AuthContext } from "../context/AuthContext";
 import AwesomeAlert from 'react-native-awesome-alerts';
+import { Badge } from "react-native-paper";
 
 export default function HomeScreen({navigation}) {
     const [hasPermission, setHasPermission] = useState(null)
@@ -14,6 +15,7 @@ export default function HomeScreen({navigation}) {
     const [firstName, setFirstName] = useState("")
     const [fatherName, setFatherName] = useState("")
     const [empId, setEmpId] = useState(null)
+    const [served, setServed] = useState([])
 
     const {accessToken} = useContext(AuthContext)
     const {isLoading, setIsLoading} = useContext(AuthContext)
@@ -88,9 +90,9 @@ export default function HomeScreen({navigation}) {
           setIsLoading(false)
           alert("Please try again!")
         }
-      }
+    }
       
-      const serve = () => {
+    const serve = () => {
         setIsLoading(true)
         try{
           fetch(`http://localhost:3000/v1/employees/${empId}`,{
@@ -117,6 +119,7 @@ export default function HomeScreen({navigation}) {
           })
           .then(({status, ok, json})=>{
             if(ok){
+              setServed([...served, {key: `${firstName} ${fatherName} ${orderAmount}`}])
               setIsLoading(false)
               hideAlert() //critical if not set "AwesomeAlert" can keep on calling serve method
               navigation.navigate("ServeScreen", {
@@ -126,6 +129,7 @@ export default function HomeScreen({navigation}) {
                 message: json.success
               })
               // alert(json.success)
+              // console.log(scanned)
             }else{
               setIsLoading(false)
               hideAlert()
@@ -194,6 +198,10 @@ export default function HomeScreen({navigation}) {
       setShowAlert(false)
     };
 
+    const clearList = () => {
+      setServed([])
+    }
+
     return (
       <View style={styles.container}>
         {
@@ -210,6 +218,30 @@ export default function HomeScreen({navigation}) {
               </View>
             </Modal>
           ) 
+        }
+        {
+          !scanned && (
+            <View style={{flexDirection: "row", alignSelf: "flex-end"}}>
+              <Badge size={30}>{served.length}</Badge>
+              <TouchableOpacity
+                  style={{...styles.button, marginLeft: 8}}
+                  onPress={() => clearList()}
+              >
+                  <Text style={{fontSize: 16, color: theme.colors.tint}}>አዲስ ጠረፔዛ</Text>
+              </TouchableOpacity>
+            </View>
+          )
+        }
+        {
+          !scanned && (
+            <View style={styles.list}>
+              <FlatList 
+                data={served}
+                renderItem={({item}) => <Text style={styles.item}>{item.key}</Text>}
+                style={{}}
+              />
+            </View>
+          )
         }
         <Counter 
           start={orderAmount} 
@@ -264,8 +296,9 @@ export default function HomeScreen({navigation}) {
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
+    marginVertical: 20,
     flex: 1,
   },
   text: {
@@ -284,5 +317,21 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 12,
     marginTop: 20
+  },
+  list: {
+    height: 200, 
+    marginTop: 10, 
+    marginBottom: 50, 
+    paddingHorizontal: 5,
+    paddingVertical: 5,
+    borderWidth: 1, 
+    borderColor: theme.colors.primary, 
+    width: "85%", 
+    borderRadius: 12
+  },
+  item: {
+    padding: 10,
+    fontSize: 18,
+    height: 44,
   }
 });
