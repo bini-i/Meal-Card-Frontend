@@ -6,7 +6,7 @@ import { AuthContext } from '../context/AuthContext'
 // import {useAuthentication} from '../utils/useAuthentication'
 
 export default function RootNavigation() {
-    const {accessToken} = useContext(AuthContext)
+    const {accessToken} = useContext(AuthContext);
     // const {user} = useAuthentication();
 
     return accessToken ? <UserStack/> : <AuthStack />

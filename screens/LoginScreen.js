@@ -97,7 +97,6 @@ export default function LoginScreen({ navigation }) {
         onChangeText={handlePasswordInput}
         value={password}
         label="የሚስጥር ቁጥር"
-        right={<Input.Icon name="eye" />}
         secureTextEntry
         autoCapitalize="none"
       />
